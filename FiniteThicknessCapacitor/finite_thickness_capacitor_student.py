@@ -105,8 +105,8 @@ def plot_results(potential, charge_density, x_coords, y_coords):
     X, Y = np.meshgrid(x_coords, y_coords)
 
     fig = plt.figure(figsize=(15, 6))
-    
-    # Potential contour plot
+
+    # Subplot 1: 3D Visualization of Potential 
     ax1 = fig.add_subplot(121, projection='3d')
     ax1.plot_wireframe(X, Y, potential, rstride=3, cstride=3, color='r')
     levels =np.linspace(potential.min(),potential.max(),20)
@@ -121,9 +121,9 @@ def plot_results(potential, charge_density, x_coords, y_coords):
     ax2 = fig.add_subplot(122, projection='3d')
     surf = ax2.plot_surface(X, Y, charge_density, cmap='RdBu_r', edgecolor='none')
     fig.colorbar(surf, ax=ax2, shrink=0.5, aspect=5, label='Charge Density')
-    plt.xlabel('X Position')
-    plt.ylabel('Y Position')
-    plt.title('3D Charge Density Distribution')
+    ax2.set_xlabel('X Position')
+    ax2.set_ylabel('Y Position')
+    ax2.set_zlabel('Charge Density')
     plt.savefig('3D Charge Density Distribution')
     
     plt.tight_layout()
@@ -131,23 +131,19 @@ def plot_results(potential, charge_density, x_coords, y_coords):
 
 if __name__ == "__main__":
     # TODO: Set simulation parameters and call functions
-    nx = 120  # Number of grid points in x direction
-    ny = 100  # Number of grid points in y direction
-    plate_thickness = 10  # Thickness of conductor plates in grid points
-    plate_separation = 40  # Separation between plates in grid points
-    omega = 1.9  # Relaxation factor
-    max_iter = 10000  # Maximum number of iterations
-    tolerance = 1e-6  # Convergence tolerance
+    nx, ny = 120, 100  # Grid dimensions
+    plate_thickness = 10  # Conductor thickness in grid points
+    plate_separation = 40  # Distance between plates
+    omega = 1.9  # SOR relaxation factor
     
-    # Grid spacing (uniform)
-    Lx = 1.0  # Domain length in x direction
-    Ly = 1.0  # Domain length in y direction
+    # Physical dimensions
+    Lx, Ly = 1.0, 1.0  # Domain size
     dx = Lx / (nx - 1)
     dy = Ly / (ny - 1)
     
+    # Create coordinate arrays
     x_coords = np.linspace(0, Lx, nx)
     y_coords = np.linspace(0, Ly, ny)
-    X, Y = np.meshgrid(x_coords, y_coords)
     
     print("Solving finite thickness parallel plate capacitor...")
     print(f"Grid size: {nx} x {ny}")
