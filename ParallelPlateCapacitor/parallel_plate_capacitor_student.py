@@ -123,7 +123,7 @@ def solve_laplace_sor(xgrid, ygrid, w, d, omega=1.25, Niter=1000, tol=1e-5):
         iterations += 1
         if max_change < tol:
             break
-#大致同Jacobi迭代法
+    #大致同Jacobi迭代法
     
     return u, iterations, convergence_history
 
