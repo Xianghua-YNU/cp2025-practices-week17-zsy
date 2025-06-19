@@ -28,8 +28,11 @@ def solve_laplace_sor(nx, ny, plate_thickness, plate_separation, omega=1.9, max_
     # TODO: Implement SOR iteration for Laplace equation
     U = np.zeros((ny, nx))
     
+    # Create conductor mask
     conductor_mask = np.zeros((ny, nx), dtype=bool)
     
+    # Define conductor regions
+    # Upper plate: +100V
     conductor_left = nx//4
     conductor_right = nx//4*3
     y_upper_start = ny // 2 + plate_separation // 2
@@ -43,33 +46,37 @@ def solve_laplace_sor(nx, ny, plate_thickness, plate_separation, omega=1.9, max_
     conductor_mask[y_lower_start:y_lower_end, conductor_left:conductor_right] = True
     U[y_lower_start:y_lower_end, conductor_left:conductor_right] = -100.0
     
-    # 左右边界设为0V
+    # Boundary conditions: grounded sides
     U[:, 0] = 0.0
     U[:, -1] = 0.0
     U[0, :] = 0.0
     U[-1, :] = 0.0
     
-    # SOR迭代
+    # SOR iteration
     for iteration in range(max_iter):
         U_old = U.copy()
         max_error = 0.0
-    
+        
+        # Update interior points (excluding conductors and boundaries)
         for i in range(1, ny-1):
             for j in range(1, nx-1):
-                if not conductor_mask[i, j]: 
+                if not conductor_mask[i, j]:  # Skip conductor points
+                    # SOR update formula
                     U_new = 0.25 * (U[i+1, j] + U[i-1, j] + U[i, j+1] + U[i, j-1])
                     U[i, j] = (1 - omega) * U[i, j] + omega * U_new
                     
+                    # Track maximum error
                     error = abs(U[i, j] - U_old[i, j])
                     max_error = max(max_error, error)
-    
+        
+        # Check convergence
         if max_error < tolerance:
             print(f"Converged after {iteration + 1} iterations")
             break
     else:
         print(f"Warning: Maximum iterations ({max_iter}) reached")
     
-    return potential
+    return U
 
 def calculate_charge_density(potential_grid, dx, dy):
     """
