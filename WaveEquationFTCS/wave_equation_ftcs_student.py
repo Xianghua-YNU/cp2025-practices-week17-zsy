@@ -20,8 +20,8 @@ def u_t(x, C=1, d=0.1, sigma=0.3, L=1):
         np.ndarray: 初始速度剖面。
     """
     # TODO: 实现初始速度剖面函数
-    raise NotImplementedError(f"请在 {__file__} 中实现此函数")
-
+    return C * x * (L - x) / L / L * np.exp(-(x - d)**2 / (2 * sigma**2))
+    
 def solve_wave_equation_ftcs(parameters):
     """
     使用FTCS有限差分法求解一维波动方程。
@@ -61,8 +61,30 @@ def solve_wave_equation_ftcs(parameters):
     # TODO: 应用初始条件
     # TODO: 实现FTCS主算法
     # TODO: 返回结果
-    raise NotImplementedError(f"请在 {__file__} 中实现此函数")
+    a = parameters.get('a', 100)
+    L = parameters.get('L', 1)
+    d = parameters.get('d', 0.1)
+    C = parameters.get('C', 1)
+    sigma = parameters.get('sigma', 0.3)
+    dx = parameters.get('dx', 0.01)
+    dt = parameters.get('dt', 5e-5)
+    total_time = parameters.get('total_time', 0.1)
 
+    x = np.arange(0, L + dx, dx)
+    t = np.arange(0, total_time + dt, dt)
+    u = np.zeros((x.size, t.size), float)
+
+    # Stability condition check (c < 1)
+   
+    c_val = (a * dt / dx)**2
+    if c_val >= 1:
+        print(f"Warning: Stability condition c = {c_val} >= 1. Solution may be unstable.")
+    u[1:-1, 1] = u_t(x[1:-1], C, d, sigma, L) * dt
+    
+    for j in range(1, t.size - 1):
+        u[1:-1, j + 1] = c_val * (u[2:, j] + u[:-2, j]) + 2 * (1 - c_val) * u[1:-1, j] - u[1:-1, j - 1]
+
+    return u, x, t
 
 if __name__ == "__main__":
     # Demonstration and testing
