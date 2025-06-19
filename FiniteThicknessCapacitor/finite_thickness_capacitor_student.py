@@ -26,7 +26,7 @@ def solve_laplace_sor(nx, ny, plate_thickness, plate_separation, omega=1.9, max_
         np.ndarray: 2D electric potential distribution
     """
     # TODO: Implement SOR iteration for Laplace equation
-    U = np.zeros((ny, nx))
+    potential = np.zeros((ny, nx))
     
     # Create conductor mask
     conductor_mask = np.zeros((ny, nx), dtype=bool)
@@ -38,23 +38,23 @@ def solve_laplace_sor(nx, ny, plate_thickness, plate_separation, omega=1.9, max_
     y_upper_start = ny // 2 + plate_separation // 2
     y_upper_end = y_upper_start + plate_thickness
     conductor_mask[y_upper_start:y_upper_end, conductor_left:conductor_right] = True
-    U[y_upper_start:y_upper_end, conductor_left:conductor_right] = 100.0
+    potential[y_upper_start:y_upper_end, conductor_left:conductor_right] = 100.0
     
     # Lower plate: -100V
     y_lower_end = ny // 2 - plate_separation // 2
     y_lower_start = y_lower_end - plate_thickness
     conductor_mask[y_lower_start:y_lower_end, conductor_left:conductor_right] = True
-    U[y_lower_start:y_lower_end, conductor_left:conductor_right] = -100.0
+    potential[y_lower_start:y_lower_end, conductor_left:conductor_right] = -100.0
     
     # Boundary conditions: grounded sides
-    U[:, 0] = 0.0
-    U[:, -1] = 0.0
-    U[0, :] = 0.0
-    U[-1, :] = 0.0
+    potential[:, 0] = 0.0
+    potential[:, -1] = 0.0
+    potential[0, :] = 0.0
+    potential[-1, :] = 0.0
     
     # SOR iteration
     for iteration in range(max_iter):
-        U_old = U.copy()
+        potential_old = potential.copy()
         max_error = 0.0
         
         # Update interior points (excluding conductors and boundaries)
@@ -62,8 +62,8 @@ def solve_laplace_sor(nx, ny, plate_thickness, plate_separation, omega=1.9, max_
             for j in range(1, nx-1):
                 if not conductor_mask[i, j]:  # Skip conductor points
                     # SOR update formula
-                    U_new = 0.25 * (U[i+1, j] + U[i-1, j] + U[i, j+1] + U[i, j-1])
-                    U[i, j] = (1 - omega) * U[i, j] + omega * U_new
+                    potential_new = 0.25 * (potential[i+1, j] + potential[i-1, j] + potential[i, j+1] + potential[i, j-1])
+                    potential[i, j] = (1 - omega) * U[i, j] + omega * U_new
                     
                     # Track maximum error
                     error = abs(U[i, j] - U_old[i, j])
@@ -76,7 +76,7 @@ def solve_laplace_sor(nx, ny, plate_thickness, plate_separation, omega=1.9, max_
     else:
         print(f"Warning: Maximum iterations ({max_iter}) reached")
     
-    return U
+    return potential
 
 def calculate_charge_density(potential_grid, dx, dy):
     """
@@ -91,9 +91,9 @@ def calculate_charge_density(potential_grid, dx, dy):
         np.ndarray: 2D charge density distribution
     """
     # TODO: Calculate charge density from potential
-    laplacian_U = laplace(potential_grid, mode='nearest') / (dx**2) # Assuming dx=dy
+    laplacian = laplace(potential_grid, mode='nearest') / (dx**2) # Assuming dx=dy
     
-    rho = -laplacian_U / (4 * np.pi)
+    rho = -laplacian / (4 * np.pi)
     
     
     return rho
