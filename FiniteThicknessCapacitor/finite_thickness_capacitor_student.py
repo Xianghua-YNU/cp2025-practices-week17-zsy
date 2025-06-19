@@ -84,12 +84,12 @@ def calculate_charge_density(potential_grid, dx, dy):
         np.ndarray: 2D charge density distribution
     """
     # TODO: Calculate charge density from potential
-    laplacian = laplace(potential_grid, mode='nearest') / (dx**2)
+    laplacian_U = laplace(potential_grid, mode='nearest') / (dx**2) # Assuming dx=dy
     
-    # 根据泊松方程 ∇²U = -4πρ 计算电荷密度
-    charge_density = -laplacian / (4 * np.pi)
+    rho = -laplacian_U / (4 * np.pi)
     
-    return charge_density
+    
+    return rho
 
 def plot_results(potential, charge_density, x_coords, y_coords):
     """
